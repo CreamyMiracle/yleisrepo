@@ -1,0 +1,37 @@
+<launch>
+
+<arg name="world" default="$(find moro_simulator)/world/maze.world" />
+  <arg name="map" default="$(find moro_simulator)/world/maze.yaml" />
+  <arg name="rviz" default="$(find moro_simulator)/rviz/moro_simulator.rviz" />
+  <arg name="constrained" default="true" />
+
+  <!-- Launch stage simulation -->
+  <param name="/use_sim_time" value="true" />
+
+  <node name="stage_ros" pkg="stage_ros" type="stageros" args="$(arg world)">
+    <param name="constrainedDiffDrive" value="$(arg constrained)" />
+    <remap from="scan" to="base_scan" />
+    <remap from="cmd_vel" to="cmd_vel" />
+    <remap from="odom" to="odom" />
+  </node>
+
+  <!-- Launch map server -->
+  <!-- node name="map_server" pkg="map_server" type="map_server" args="$(arg map)" /-->
+
+  <!-- Launch visualization -->
+  <node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(arg rviz)" />
+
+  <!-- TODO: remove once localization is implemented -->
+  <node pkg="tf" type="static_transform_publisher" name="link_broadcaster" args="5 5 0 0 0 0 1 map odom 100" />
+  
+  <!-- Launch stage controller-->
+  <node  pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop" output="screen" />
+  
+
+  <!-- Launch EKF localization-->
+  <node  pkg="moro_g12" type="ekf_slam_localization.py" name="ekf_slam_localization" output="screen" />
+
+  
+
+  
+</launch>
